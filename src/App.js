@@ -18,6 +18,7 @@ const App = () => {
    */
   const [currentAccount, setCurrentAccount] = useState("")
   const [nftMinted, setNftMinted] = useState(0)
+  const [isDisabled, setIsDisabled] = useState(false)
 
   /*
    * Gotta make sure this is async
@@ -45,6 +46,7 @@ const App = () => {
       const account = accounts[0]
       console.log("Found an authorized account:", account)
       setCurrentAccount(account)
+      isUserConnectedToRinkeby(ethereum)
       // Setup listener! This is for the case where a user comes to our site
       // and ALREADY had their wallet connected + authorized.
       setupEventListener()
@@ -71,12 +73,32 @@ const App = () => {
       // Boom! This should print out public address once we authorize Metamask
       console.log("Connected", accounts[0])
       setCurrentAccount(accounts[0])
+      isUserConnectedToRinkeby(ethereum)
 
       // Setup listener! This is for the case where a user comes to our site
       // and connected their wallet for the first time.
       setupEventListener()
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  /**
+   * @param {Object} eth the ethereum object to interact with metamask
+   * @param {Boolean} check To know if function return a value
+   * @returns a boolean if the user is connected to correct chain
+   */
+  const isUserConnectedToRinkeby = async (eth, check=false) => {
+    let chainId = await eth.request({ method: 'eth_chainId'})
+    console.log("Connected to chain " + chainId)
+
+    // String, hex code of the chainId of the Rinkebey test network
+    const rinkebyChainId = "0x4"
+    const isRinkebyCain = chainId !== rinkebyChainId
+    if (check) return isRinkebyCain
+    else if (isRinkebyCain) {
+      setIsDisabled(true)
+      alert("You are not connected to the Rinkeby Test Network! \n Please change of network")
     }
   }
 
@@ -119,7 +141,9 @@ const App = () => {
     try {
       const { ethereum } = window
 
-      if (ethereum) {
+      const correctChain = await isUserConnectedToRinkeby(ethereum, true)
+      console.log("correct Chain", correctChain)
+      if (ethereum && !correctChain) {
         const provider = new ethers.providers.Web3Provider(ethereum)
         const signer = provider.getSigner()
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer)
@@ -135,6 +159,8 @@ const App = () => {
         setNftMinted(nfts.toNumber())
 
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx${nftTxn.hash}`)
+      } else if (correctChain) {
+        alert("You are not connected to the Rinkeby Test Network! \n Please change of network")
       } else {
         console.log("Ethereum object doesn't exist!")
       }
@@ -158,7 +184,11 @@ const App = () => {
 
   const WalletButton = ({children, func}) => {
     return (
-      <button className="cta-button connect-wallet-button" onClick={func}>
+      <button
+        className="cta-button connect-wallet-button"
+        onClick={func}
+        disabled={isDisabled ? 'disabled' : ''}
+      >
         {children}
       </button>
     )
