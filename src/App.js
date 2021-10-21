@@ -91,14 +91,9 @@ const App = () => {
         const signer = provider.getSigner()
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer)
 
-        /**
-         * if nftMinted == 0 mean that the app is connecting.
-         * So I should call nftMinted to know the current nfts minted
-         */
-        if (nftMinted === 0) {
+        // So I should call nftMinted to know the current nfts minted
           let nfts = await connectedContract.nftMintedSoFat()
           setNftMinted(nfts.toNumber())
-        }
 
         /**
          * THIS IS THE MAGIC SAUCE.
@@ -108,7 +103,6 @@ const App = () => {
          */
         connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
           console.log(from, tokenId.toNumber())
-          setNftMinted(tokenId.toNumber())
           alert(`Hey there! We've minted your NFT. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: <https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}>`)
         })
 
@@ -136,6 +130,10 @@ const App = () => {
         console.log("Mining... please wait")
         await nftTxn.wait()
 
+        // So I should call nftMinted to know the current nfts minted
+        let nfts = await connectedContract.nftMintedSoFat()
+        setNftMinted(nfts.toNumber())
+
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx${nftTxn.hash}`)
       } else {
         console.log("Ethereum object doesn't exist!")
@@ -158,6 +156,14 @@ const App = () => {
     )
   }
 
+  const WalletButton = ({children, func}) => {
+    return (
+      <button className="cta-button connect-wallet-button" onClick={func}>
+        {children}
+      </button>
+    )
+  }
+
   return (
     <div className="App">
       <div className="container">
@@ -170,13 +176,13 @@ const App = () => {
             <ShowNftMinted />
           }
           {currentAccount === "" ? (
-            <button className="cta-button connect-wallet-button" onClick={connectWallet}>
+            <WalletButton func={connectWallet}>
               Connect to Wallet
-            </button>
+            </WalletButton>
           ) : (
-            <button className="cta-button connect-wallet-button" onClick={askContractToMintNft}>
+            <WalletButton func={askContractToMintNft}>
               Mint NFT
-            </button>
+            </WalletButton>
           )}
         </div>
         <div className="footer-container">
