@@ -10,13 +10,14 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 // const OPENSEA_LINK = '';
 // const TOTAL_MINT_COUNT = 50;
 // I moved the contract address to the top for easy access.
-const CONTRACT_ADDRESS = "0xF18F85E73268c5452243eBEe6287bCDce517d1F6"
+const CONTRACT_ADDRESS = "0x0c5049eda58298014f491B32E4C1222b54346D91"
 
 const App = () => {
   /*
    * Just a state variable we use to store our user's public wallet. Don't forget to import useState.
    */
   const [currentAccount, setCurrentAccount] = useState("")
+  const [nftMinted, setNftMinted] = useState(0)
 
   /*
    * Gotta make sure this is async
@@ -91,6 +92,15 @@ const App = () => {
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer)
 
         /**
+         * if nftMinted == 0 mean that the app is connecting.
+         * So I should call nftMinted to know the current nfts minted
+         */
+        if (nftMinted === 0) {
+          let nfts = await connectedContract.nftMintedSoFat()
+          setNftMinted(nfts.toNumber())
+        }
+
+        /**
          * THIS IS THE MAGIC SAUCE.
          * This will essentially "capture" our event when our contract throws it.
          * If you're familiar with webhooks, it's very similar to that!
@@ -98,12 +108,14 @@ const App = () => {
          */
         connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
           console.log(from, tokenId.toNumber())
+          setNftMinted(tokenId.toNumber())
           alert(`Hey there! We've minted your NFT. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: <https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}>`)
         })
 
         console.log("Setup event listener")
+      } else {
+        console.log("Ethereum object doesn't exist!")
       }
-      console.log("Ethereum object doesn't exist!")
     } catch (error) {
       console.log(error)
     }
@@ -140,6 +152,12 @@ const App = () => {
     checkIfWalletIsConnected()
   }, [])
 
+  const ShowNftMinted = () => {
+    return (
+      <p className="sub-text">NFT Minted: {nftMinted}/50</p>
+    )
+  }
+
   return (
     <div className="App">
       <div className="container">
@@ -148,6 +166,9 @@ const App = () => {
           <p className="sub-text">
             Each unique. Each beautiful. Discover your NFT today.
           </p>
+          {currentAccount &&
+            <ShowNftMinted />
+          }
           {currentAccount === "" ? (
             <button className="cta-button connect-wallet-button" onClick={connectWallet}>
               Connect to Wallet
