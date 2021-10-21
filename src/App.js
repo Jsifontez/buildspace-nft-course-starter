@@ -7,7 +7,7 @@ import myEpicNft from './utils/MyEpicNFT.json'
 // Constants
 const TWITTER_HANDLE = 'jsifontez_';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-// const OPENSEA_LINK = '';
+const OPENSEA_LINK = 'https://testnets.opensea.io/collection/squarenft-w4z3pahiqg';
 // const TOTAL_MINT_COUNT = 50;
 // I moved the contract address to the top for easy access.
 const CONTRACT_ADDRESS = "0x0c5049eda58298014f491B32E4C1222b54346D91"
@@ -234,15 +234,26 @@ const App = () => {
             <Buttons />
           )}
         </div>
-        <div className="footer-container">
-          <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
-          <a
-            className="footer-text"
-            href={TWITTER_LINK}
-            target="_blank"
-            rel="noreferrer"
-          >{`built on @${TWITTER_HANDLE}`}</a>
+        <div style={{display: 'flex', flexDirection:'column'}}>
+          <div className="footer-container">
+              <a
+                className="footer-text"
+                href={OPENSEA_LINK}
+                target="_blank"
+                rel="noreferrer"
+              >🌊 View Collection on OpenSea</a>
+            </div>
+            <div className="footer-container">
+              <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
+              <a
+                className="footer-text"
+                href={TWITTER_LINK}
+                target="_blank"
+                rel="noreferrer"
+              >{`built on @${TWITTER_HANDLE}`}</a>
+            </div>
         </div>
+
       </div>
     </div>
   );
