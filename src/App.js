@@ -22,6 +22,14 @@ const App = () => {
   const [isMining, setIsMining] = useState(false)
 
   /*
+   * This runs our function when the page loads.
+   */
+  useEffect(() => {
+    checkIfWalletIsConnected()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  /*
    * Gotta make sure this is async
    */
   const checkIfWalletIsConnected = async () => {
@@ -171,13 +179,6 @@ const App = () => {
       console.log(error)
     }
   }
-
-  /*
-   * This runs our function when the page loads.
-   */
-  useEffect(() => {
-    checkIfWalletIsConnected()
-  }, [])
 
   const ShowNftMinted = () => {
     return (
