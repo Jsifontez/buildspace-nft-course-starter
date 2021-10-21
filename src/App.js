@@ -19,6 +19,7 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState("")
   const [nftMinted, setNftMinted] = useState(0)
   const [isDisabled, setIsDisabled] = useState(false)
+  const [isMining, setIsMining] = useState(false)
 
   /*
    * Gotta make sure this is async
@@ -152,6 +153,7 @@ const App = () => {
         let nftTxn = await connectedContract.makeAnEpicNFT()
 
         console.log("Mining... please wait")
+        setIsMining(true)
         await nftTxn.wait()
 
         // So I should call nftMinted to know the current nfts minted
@@ -159,6 +161,7 @@ const App = () => {
         setNftMinted(nfts.toNumber())
 
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx${nftTxn.hash}`)
+        setIsMining(false)
       } else if (correctChain) {
         alert("You are not connected to the Rinkeby Test Network! \n Please change of network")
       } else {
@@ -194,6 +197,26 @@ const App = () => {
     )
   }
 
+  const NftIsMining = () => (
+    <div>
+      <p className="sub-text" style={{fontWeight:'bold', marginTop: '3.5rem'}}>Mining the NFT... Please wait</p>
+    </div>
+  )
+
+  const Buttons = () => (
+    <div>
+      {currentAccount === "" ? (
+        <WalletButton func={connectWallet}>
+          Connect to Wallet
+        </WalletButton>
+      ) : (
+        <WalletButton func={askContractToMintNft}>
+          Mint NFT
+        </WalletButton>
+      )}
+    </div>
+  )
+
   return (
     <div className="App">
       <div className="container">
@@ -205,14 +228,10 @@ const App = () => {
           {currentAccount &&
             <ShowNftMinted />
           }
-          {currentAccount === "" ? (
-            <WalletButton func={connectWallet}>
-              Connect to Wallet
-            </WalletButton>
+          {isMining ? (
+            <NftIsMining/>
           ) : (
-            <WalletButton func={askContractToMintNft}>
-              Mint NFT
-            </WalletButton>
+            <Buttons />
           )}
         </div>
         <div className="footer-container">
